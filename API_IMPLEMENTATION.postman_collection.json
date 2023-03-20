@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "62b29517-4feb-41a4-a0e8-96efd14f5007",
+		"name": "API_IMPLEMENTATION",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18980451"
+	},
+	"item": [
+		{
+			"name": "Get a New Access Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Amz-Target",
+						"value": "AWSCognitoIdentityProviderService.InitiateAuth",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-amz-json-1.1",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"AuthParameters\" : {\n      \"USERNAME\" : \"\",\n      \"PASSWORD\" : \"\"\n   },\n   \"AuthFlow\" : \"USER_PASSWORD_AUTH\",\n   \"ClientId\" : \"6lq8dhd1bg7nli3hvr6ck6lefu\"\n}",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cognito-idp.us-east-2.amazonaws.com",
+					"protocol": "https",
+					"host": [
+						"cognito-idp",
+						"us-east-2",
+						"amazonaws",
+						"com"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Hello World",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://1vjh7nd8k5.execute-api.us-east-2.amazonaws.com/Dev/test",
+					"protocol": "https",
+					"host": [
+						"1vjh7nd8k5",
+						"execute-api",
+						"us-east-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Dev",
+						"test"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
