@@ -39,8 +39,7 @@ terraform-docs -c .terraform-docs.yml .
 README.md updated successfully
 ```
 <!-- BEGIN_TF_DOCS -->
-# Module Documentation
-  ## Requirements
+## Requirements
 
 | Name | Version |
 |------|---------|
