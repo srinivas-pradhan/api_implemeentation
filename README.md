@@ -1,4 +1,4 @@
-# ADD README HERE
+# API Implementation
 
 
 ### Template Repo Initialization
@@ -39,7 +39,8 @@ terraform-docs -c .terraform-docs.yml .
 README.md updated successfully
 ```
 <!-- BEGIN_TF_DOCS -->
-## Requirements
+# Module Documentation
+  ## Requirements
 
 | Name | Version |
 |------|---------|
@@ -51,7 +52,9 @@ No providers.
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_example"></a> [api\_example](#module\_api\_example) | ./modules/api_example | n/a |
 
 ## Resources
 
