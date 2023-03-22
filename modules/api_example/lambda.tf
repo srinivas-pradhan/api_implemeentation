@@ -49,7 +49,7 @@ resource "aws_iam_policy" "policy" {
           "logs:PutLogEvents"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:logs:us-east-2:703866956858:log-group:/aws/lambda/test-function:*"
+        Resource = "arn:aws:logs:us-east-2:703866956858:log-group:/aws/lambda/*:*"
       },
     ]
   })
@@ -76,5 +76,5 @@ resource "aws_lambda_permission" "allow_apigateway" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api_function.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:1vjh7nd8k5/*/*/test"
+  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:d0str5d9me/*/*/test"
 }
