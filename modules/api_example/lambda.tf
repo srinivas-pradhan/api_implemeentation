@@ -55,20 +55,20 @@ resource "aws_iam_policy" "policy" {
   })
 }
 
-data "archive_file" "python_lambda_package_expected_function" {  
-  type = "zip"  
-  source_file = "${path.module}/code/expected_function.py" 
+data "archive_file" "python_lambda_package_expected_function" {
+  type        = "zip"
+  source_file = "${path.module}/code/expected_function.py"
   output_path = "${path.module}/code/expected_function.zip"
 }
 
 resource "aws_lambda_function" "expected_api_function" {
-        function_name = "Expected_API_Implementation"
-        filename      = "${path.module}/code/expected_function.zip"
-        source_code_hash = data.archive_file.python_lambda_package.output_base64sha256
-        role          = aws_iam_role.role.arn
-        runtime       = "python3.8"
-        handler       = "expected_function.lambda_handler"
-        timeout       = 10
+  function_name    = "Expected_API_Implementation"
+  filename         = "${path.module}/code/expected_function.zip"
+  source_code_hash = data.archive_file.python_lambda_package.output_base64sha256
+  role             = aws_iam_role.role.arn
+  runtime          = "python3.8"
+  handler          = "expected_function.lambda_handler"
+  timeout          = 10
 }
 
 resource "aws_lambda_permission" "allow_apigateway_expected_function" {
@@ -79,20 +79,20 @@ resource "aws_lambda_permission" "allow_apigateway_expected_function" {
   source_arn    = "arn:aws:execute-api:us-east-2:703866956858:odu5eaycaf/*/*/test"
 }
 
-data "archive_file" "python_lambda_package" {  
-  type = "zip"  
-  source_file = "${path.module}/code/function.py" 
+data "archive_file" "python_lambda_package" {
+  type        = "zip"
+  source_file = "${path.module}/code/function.py"
   output_path = "${path.module}/code/function.zip"
 }
 
 resource "aws_lambda_function" "api_function" {
-        function_name = "API_Implementation"
-        filename      = "${path.module}/code/function.zip"
-        source_code_hash = data.archive_file.python_lambda_package.output_base64sha256
-        role          = aws_iam_role.role.arn
-        runtime       = "python3.8"
-        handler       = "function.lambda_handler"
-        timeout       = 10
+  function_name    = "API_Implementation"
+  filename         = "${path.module}/code/function.zip"
+  source_code_hash = data.archive_file.python_lambda_package.output_base64sha256
+  role             = aws_iam_role.role.arn
+  runtime          = "python3.8"
+  handler          = "function.lambda_handler"
+  timeout          = 10
 }
 
 resource "aws_lambda_permission" "allow_apigateway" {

@@ -21,21 +21,30 @@ resource "aws_api_gateway_resource" "num" {
   path_part   = "{num}"
 }
 
+resource "aws_api_gateway_authorizer" "api_authorizer" {
+  name            = "cognito-authorizer"
+  type            = "COGNITO_USER_POOLS"
+  rest_api_id     = aws_api_gateway_rest_api.API.id
+  provider_arns   = [aws_cognito_user_pool.api_pool.arn]
+  identity_source = "method.request.header.Authorization"
+}
+
 resource "aws_api_gateway_method" "get_method" {
   rest_api_id   = aws_api_gateway_rest_api.API.id
   resource_id   = aws_api_gateway_resource.num.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.api_authorizer.id
   request_parameters = {
     "method.request.path.num" = true
   }
 }
 
 resource "aws_api_gateway_integration" "integration" {
-  rest_api_id               = aws_api_gateway_rest_api.API.id
-  resource_id               = aws_api_gateway_resource.num.id
-  http_method               = aws_api_gateway_method.get_method.http_method
-  integration_http_method   = "POST"
+  rest_api_id             = aws_api_gateway_rest_api.API.id
+  resource_id             = aws_api_gateway_resource.num.id
+  http_method             = aws_api_gateway_method.get_method.http_method
+  integration_http_method = "POST"
   type                    = "AWS"
   uri                     = aws_lambda_function.expected_api_function.invoke_arn
   passthrough_behavior    = "WHEN_NO_MATCH"
@@ -44,7 +53,7 @@ resource "aws_api_gateway_integration" "integration" {
   request_parameters = {
     "integration.request.path.id" = "method.request.path.num"
   }
-    request_templates = {
+  request_templates = {
     "application/json" = <<EOF
 {
    "combination": "$input.params('num')"
@@ -80,10 +89,10 @@ resource "aws_api_gateway_method" "noauth_get_method" {
 
 
 resource "aws_api_gateway_integration" "noauth_integration" {
-  rest_api_id               = aws_api_gateway_rest_api.API.id
-  resource_id               = aws_api_gateway_resource.noauth_num.id
-  http_method               = aws_api_gateway_method.noauth_get_method.http_method
-  integration_http_method   = "POST"
+  rest_api_id             = aws_api_gateway_rest_api.API.id
+  resource_id             = aws_api_gateway_resource.noauth_num.id
+  http_method             = aws_api_gateway_method.noauth_get_method.http_method
+  integration_http_method = "POST"
   type                    = "AWS"
   uri                     = aws_lambda_function.expected_api_function.invoke_arn
   passthrough_behavior    = "WHEN_NO_MATCH"
@@ -92,7 +101,7 @@ resource "aws_api_gateway_integration" "noauth_integration" {
   request_parameters = {
     "integration.request.path.id" = "method.request.path.num"
   }
-    request_templates = {
+  request_templates = {
     "application/json" = <<EOF
 {
    "combination": "$input.params('num')"
