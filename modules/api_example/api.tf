@@ -37,14 +37,6 @@ resource "aws_apigatewayv2_integration" "api_integration" {
   integration_uri = "arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:703866956858:function:API_Implementation/invocations"
 }
 
-resource "aws_apigatewayv2_integration" "expected_api_integration" {
-  api_id           = aws_apigatewayv2_api.api_implementation.id
-  integration_type = "AWS_PROXY"
-  connection_type = "INTERNET"
-  integration_method = "POST"
-  integration_uri = "arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:703866956858:function:Expected_API_Implementation/invocations"
-}
-
 resource "aws_apigatewayv2_route" "api_route" {
   api_id    = aws_apigatewayv2_api.api_implementation.id
   route_key = "GET /test"
@@ -53,20 +45,11 @@ resource "aws_apigatewayv2_route" "api_route" {
   authorizer_id = aws_apigatewayv2_authorizer.api_auth.id
 }
 
-resource "aws_apigatewayv2_route" "expected_api_route" {
-  api_id    = aws_apigatewayv2_api.api_implementation.id
-  route_key = "GET /expected_test"
-  target = "integrations/${aws_apigatewayv2_integration.expected_api_integration.id}"
-  authorization_type = "JWT"
-  authorizer_id = aws_apigatewayv2_authorizer.api_auth.id
-}
-
 resource "aws_apigatewayv2_deployment" "api_deployment" {
   api_id      = aws_apigatewayv2_api.api_implementation.id
   description = "Dev"
   depends_on = [
-    aws_apigatewayv2_route.api_route,
-    aws_apigatewayv2_route.expected_api_route
+    aws_apigatewayv2_route.api_route
   ]
   lifecycle {
     create_before_destroy = true
