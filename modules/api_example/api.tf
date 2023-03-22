@@ -1,59 +1,102 @@
-resource "aws_cognito_user_pool" "api_pool" {
-  name = var.pool_name
+resource "aws_api_gateway_rest_api" "API" {
+  name        = "API"
+  description = "This is my API for demonstration purposes"
 }
 
-resource "aws_cognito_user_pool_client" "api_client" {
-  name = "API_Example_Key"
-  user_pool_id = aws_cognito_user_pool.api_pool.id
-  explicit_auth_flows = [
-    "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_USER_SRP_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH"
-  ]
+resource "aws_api_gateway_resource" "auth" {
+  rest_api_id = aws_api_gateway_rest_api.API.id
+  parent_id   = aws_api_gateway_rest_api.API.root_resource_id
+  path_part   = "auth"
 }
 
-resource "aws_apigatewayv2_api" "api_implementation" {
-  name = "api_implementation"
-  protocol_type = var.protocol_type
+resource "aws_api_gateway_resource" "combination" {
+  rest_api_id = aws_api_gateway_rest_api.API.id
+  parent_id   = aws_api_gateway_resource.auth.id
+  path_part   = "combination"
 }
 
-resource "aws_apigatewayv2_authorizer" "api_auth" {
-  api_id           = aws_apigatewayv2_api.api_implementation.id
-  authorizer_type  = "JWT"
-  identity_sources = ["$request.header.Authorization"]
-  name             = "cognito-authorizer"
+resource "aws_api_gateway_resource" "num" {
+  rest_api_id = aws_api_gateway_rest_api.API.id
+  parent_id   = aws_api_gateway_resource.combination.id
+  path_part   = "{num}"
+}
 
-  jwt_configuration {
-    audience = [aws_cognito_user_pool_client.api_client.id]
-    issuer   = "https://${aws_cognito_user_pool.api_pool.endpoint}"
+resource "aws_api_gateway_method" "get_method" {
+  rest_api_id   = aws_api_gateway_rest_api.API.id
+  resource_id   = aws_api_gateway_resource.num.id
+  http_method   = "GET"
+  authorization = "NONE"
+  request_parameters = {
+    "method.request.path.num" = true
   }
 }
 
-resource "aws_apigatewayv2_integration" "api_integration" {
-  api_id           = aws_apigatewayv2_api.api_implementation.id
-  integration_type = "AWS_PROXY"
-  connection_type = "INTERNET"
-  integration_method = "POST"
-  integration_uri = "arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:703866956858:function:API_Implementation/invocations"
+resource "aws_api_gateway_integration" "integration" {
+  rest_api_id               = aws_api_gateway_rest_api.API.id
+  resource_id               = aws_api_gateway_resource.num.id
+  http_method               = aws_api_gateway_method.get_method.http_method
+  integration_http_method   = "POST"
+  type                    = "AWS"
+  uri                     = aws_lambda_function.expected_api_function.invoke_arn
+  passthrough_behavior    = "WHEN_NO_MATCH"
+  content_handling        = "CONVERT_TO_TEXT"
+  cache_key_parameters    = []
+  request_parameters = {
+    "integration.request.path.id" = "method.request.path.num"
+  }
+    request_templates = {
+    "application/json" = <<EOF
+{
+   "combination": "$input.params('num')"
 }
-
-resource "aws_apigatewayv2_route" "api_route" {
-  api_id    = aws_apigatewayv2_api.api_implementation.id
-  route_key = "GET /test"
-  target = "integrations/${aws_apigatewayv2_integration.api_integration.id}"
-  authorization_type = "JWT"
-  authorizer_id = aws_apigatewayv2_authorizer.api_auth.id
-}
-
-resource "aws_apigatewayv2_deployment" "api_deployment" {
-  api_id      = aws_apigatewayv2_api.api_implementation.id
-  description = "Dev"
-  depends_on = [
-    aws_apigatewayv2_route.api_route
-  ]
-  lifecycle {
-    create_before_destroy = true
+EOF
   }
 }
 
 
+# No Authorization
+
+resource "aws_api_gateway_resource" "noauth_combination" {
+  rest_api_id = aws_api_gateway_rest_api.API.id
+  parent_id   = aws_api_gateway_rest_api.API.root_resource_id
+  path_part   = "combination"
+}
+
+resource "aws_api_gateway_resource" "noauth_num" {
+  rest_api_id = aws_api_gateway_rest_api.API.id
+  parent_id   = aws_api_gateway_resource.noauth_combination.id
+  path_part   = "{num}"
+}
+
+resource "aws_api_gateway_method" "noauth_get_method" {
+  rest_api_id   = aws_api_gateway_rest_api.API.id
+  resource_id   = aws_api_gateway_resource.noauth_num.id
+  http_method   = "GET"
+  authorization = "NONE"
+  request_parameters = {
+    "method.request.path.num" = true
+  }
+}
+
+
+resource "aws_api_gateway_integration" "noauth_integration" {
+  rest_api_id               = aws_api_gateway_rest_api.API.id
+  resource_id               = aws_api_gateway_resource.noauth_num.id
+  http_method               = aws_api_gateway_method.noauth_get_method.http_method
+  integration_http_method   = "POST"
+  type                    = "AWS"
+  uri                     = aws_lambda_function.expected_api_function.invoke_arn
+  passthrough_behavior    = "WHEN_NO_MATCH"
+  content_handling        = "CONVERT_TO_TEXT"
+  cache_key_parameters    = []
+  request_parameters = {
+    "integration.request.path.id" = "method.request.path.num"
+  }
+    request_templates = {
+    "application/json" = <<EOF
+{
+   "combination": "$input.params('num')"
+}
+EOF
+  }
+}

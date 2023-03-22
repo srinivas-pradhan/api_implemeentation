@@ -72,11 +72,11 @@ resource "aws_lambda_function" "expected_api_function" {
 }
 
 resource "aws_lambda_permission" "allow_apigateway_expected_function" {
-  statement_id  = "AllowInvokeFromAPIGateway"
+  statement_id  = "AllowInvokeFromAPIGateway_expected"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.expected_api_function.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:d0str5d9me/*/*/expected_test"
+  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:odu5eaycaf/*/*/test"
 }
 
 data "archive_file" "python_lambda_package" {  
@@ -100,5 +100,5 @@ resource "aws_lambda_permission" "allow_apigateway" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api_function.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:d0str5d9me/*/*/test"
+  source_arn    = "arn:aws:execute-api:us-east-2:703866956858:odu5eaycaf/*/*/test"
 }
